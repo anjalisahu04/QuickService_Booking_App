@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.qs-navbar {
+  --qs-primary: #4A90E2; /* Soft Tech Blue */
+  --qs-primary-hover: #357ABD;
+  --qs-text-dark: #2c3e50;
+}
+
+.qs-navbar.navbar {
+  font-family: 'Poppins', sans-serif;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+  padding-top: 15px !important;
+  padding-bottom: 15px !important;
+}
+
+.qs-navbar .navbar-brand {
+  font-weight: 700 !important;
+  color: var(--qs-text-dark) !important;
+  font-size: 1.6rem !important;
+  letter-spacing: -0.5px;
+}
+
+.qs-navbar .navbar-nav .nav-link {
+  color: var(--qs-text-dark) !important;
+  font-weight: 500;
+  font-size: 1rem;
+  margin: 0 8px;
+  position: relative;
+}
+.qs-navbar .navbar-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2.5px;
+  bottom: 0px;
+  left: 0;
+  background-color: var(--qs-primary);
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.qs-navbar .navbar-nav .nav-link:hover {
+  color: var(--qs-primary) !important;
+}
+
+.qs-navbar .navbar-nav .nav-link:hover::after {
+  width: 100%;
+}
+
+.qs-navbar .nav-link.disabled {
+  color: #cbd5e0 !important;
+}
+
+.qs-navbar .btn {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.qs-navbar .btn-outline-primary {
+  color: var(--qs-primary);
+  border-color: var(--qs-primary);
+  border-width: 2px;
+}
+
+.qs-navbar .btn-outline-primary:hover {
+  background-color: var(--qs-primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.qs-navbar .btn-primary {
+  background-color: var(--qs-primary);
+  border-color: var(--qs-primary);
+  border-width: 2px;
+}
+
+.qs-navbar .btn-primary:hover {
+  background-color: var(--qs-primary-hover);
+  border-color: var(--qs-primary-hover);
+  transform: translateY(-2px);
+}
+
+.qs-navbar .nav-dropdown .dropdown-toggle {
+  color: var(--qs-text-dark) !important;
+  font-weight: 600;
+}
+
+.qs-navbar .dropdown-menu {
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+.qs-navbar .dropdown-item {
+  font-weight: 500;
+  color: var(--qs-text-dark);
+  border-radius: 8px;
+  margin: 0 5px;
+  width: auto; 
+}
+
+.qs-navbar .dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: var(--qs-primary);
+}
+
+.qs-navbar .dropdown-item.text-danger:hover {
+  background-color: #fff5f5;
+  color: #e53e3e !important;
+}

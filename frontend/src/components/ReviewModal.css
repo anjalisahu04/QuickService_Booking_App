@@ -1,0 +1,104 @@
+
+.review-modal-custom .modal-content {
+    border: none;
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.review-modal-custom .modal-header {
+    background-color: #fff;
+}
+
+.letter-spacing-1 {
+    letter-spacing: 1px;
+}
+
+
+.booking-summary-card {
+    border-left: 4px solid #0d6efd;
+    background-color: #f8f9fa;
+}
+
+.star-rating-container {
+    padding: 10px 0;
+}
+
+.star-icon-wrapper {
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 5px;
+}
+
+.star-icon {
+    font-size: 2.5rem; 
+    transition: color 0.2s ease;
+}
+
+.star-icon.empty {
+    color: #e9ecef;
+}
+
+.star-icon.filled {
+    color: #ffc107; 
+    filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3));
+}
+
+
+.star-icon-wrapper:hover {
+    transform: scale(1.2);
+}
+
+.star-icon-wrapper.active .star-icon.filled {
+    animation: starPop 0.3s ease-out;
+}
+
+@keyframes starPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+
+.rating-label {
+    min-height: 24px;
+    font-size: 1.1rem;
+}
+
+.transition-text {
+    transition: color 0.3s ease;
+}
+
+
+.modern-textarea {
+    border: 2px solid #f1f3f5;
+    border-radius: 16px;
+    padding: 15px;
+    font-size: 0.95rem;
+    resize: none;
+    background-color: #fcfcfc;
+    transition: all 0.2s ease;
+}
+
+.modern-textarea:focus {
+    background-color: #fff;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+}
+
+.character-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+
+.btn-gradient {
+    background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}

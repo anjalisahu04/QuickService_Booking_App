@@ -1,0 +1,339 @@
+
+
+.provider-details-page {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+
+.details-hero {
+    background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+    padding: 40px 0 100px 0; 
+    color: white;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    backdrop-filter: blur(5px);
+}
+.back-btn:hover {
+    background: rgba(255,255,255,0.3);
+    color: white;
+}
+
+.profile-avatar-lg {
+    width: 120px;
+    height: 120px;
+    background: white;
+    color: #0d6efd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 800;
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: -60px; /* Overlap effect */
+    position: relative;
+    z-index: 10;
+}
+
+@media (max-width: 991px) {
+    .profile-avatar-lg {
+        margin-bottom: 0;
+    }
+    .profile-header-content {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .profile-header-content .ms-4 {
+        margin-left: 0 !important;
+        margin-top: 15px;
+    }
+    .details-hero {
+        padding-bottom: 40px;
+    }
+}
+
+/* --- Section Titles --- */
+.section-title {
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+.section-title:after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 3px;
+    background: #0d6efd;
+    bottom: -8px;
+    left: 0;
+    border-radius: 2px;
+}
+
+/* --- Detail Items --- */
+.detail-item {
+    display: flex;
+    align-items: center;
+}
+
+.detail-item .icon-box {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 15px;
+}
+
+.detail-item label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #6c757d;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    display: block;
+}
+
+.detail-item p {
+    margin-bottom: 0;
+    font-weight: 500;
+    color: #212529;
+}
+
+/* --- Sticky Booking Card --- */
+.sticky-booking-card {
+    position: sticky;
+    top: 100px;
+    z-index: 5;
+}
+
+.btn-book-now {
+    transition: transform 0.2s;
+}
+.btn-book-now:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* --- Review Cards --- */
+.review-card {
+    transition: all 0.2s;
+    border-radius: 16px;
+    background: white;
+}
+.review-card:hover {
+    transform: translateY(-3px);
+}
+
+.review-text {
+    line-height: 1.6;
+    color: #495057;
+}
+
+
+.modern-input {
+    border: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+}
+.modern-input:focus {
+    background-color: white;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+}
+
+
+.bg-blue-soft { background-color: #e7f1ff; }
+.bg-green-soft { background-color: #d1e7dd; }
+.bg-yellow-soft { background-color: #fff9db; }
+.bg-purple-soft { background-color: #e0cffc; }
+
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+.provider-details-page {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+}
+
+
+.details-hero {
+    
+    background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+    padding-top: 2rem;
+    padding-bottom: 5rem; /* Space for overlap */
+    color: white;
+    border-bottom-right-radius: 50px;
+    border-bottom-left-radius: 50px;
+    box-shadow: 0 10px 30px rgba(13, 110, 253, 0.2);
+}
+
+.profile-avatar-xl {
+    width: 140px;
+    height: 140px;
+    background: white;
+    color: #0d6efd;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 800;
+    border: 6px solid rgba(255, 255, 255, 0.2);
+    /* Overlap Effect */
+    margin-bottom: -70px;
+    position: relative;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+@media (max-width: 991px) {
+    .details-hero {
+        padding-bottom: 2rem;
+        border-radius: 0;
+    }
+    .profile-avatar-xl {
+        margin-bottom: 1rem;
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+    .profile-header-wrapper {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    .profile-info {
+        margin-left: 0 !important;
+    }
+}
+
+/* --- Content Styling --- */
+.content-container {
+    padding-top: 40px; /* To account for overlap */
+}
+
+.card-hover-effect {
+    transition: transform 0.3s ease;
+}
+.card-hover-effect:hover {
+    transform: translateY(-5px);
+}
+
+/* --- Icon Boxes (Colored backgrounds) --- */
+.bg-light-blue { background-color: #e7f1ff; }
+.bg-light-green { background-color: #d1e7dd; }
+.bg-light-yellow { background-color: #fff9db; }
+.bg-light-purple { background-color: #e0cffc; }
+
+.icon-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* --- Sticky Booking Card --- */
+.sticky-booking-card {
+    position: sticky;
+    top: 100px;
+    z-index: 20;
+}
+
+.btn-gradient-dark {
+    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-gradient-dark:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* --- MODAL CSS (Requested specifically) --- */
+.modern-modal .modal-content {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+}
+
+.modal-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+/* Custom Input Styling */
+.input-group-modern {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0d6efd;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.form-control-modern {
+    padding: 12px 12px 12px 45px; /* Left padding for icon */
+    border-radius: 12px;
+    border: 2px solid #f1f3f5;
+    background-color: #f8f9fa;
+    font-weight: 500;
+    color: #495057;
+    transition: all 0.2s ease;
+}
+
+.form-control-modern:focus {
+    background-color: #fff;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+}
+
+.form-control-modern::placeholder {
+    color: #adb5bd;
+    font-weight: 400;
+}
+
+textarea.form-control-modern {
+    padding-left: 15px; /* No icon for textareas usually */
+}
+
+/* Modal Button */
+.btn-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0043a8 100%);
+    border: none;
+    transition: all 0.2s;
+}
+.btn-gradient-primary:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+}
