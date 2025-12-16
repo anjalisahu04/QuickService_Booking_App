@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Form, Alert, Tab, Tabs, Badge, ListGroup, Modal, Spinner, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Form, Alert, Tab, Tabs, Badge, ListGroup, Modal, Spinner, InputGroup, ProgressBar } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { addressService } from './AddressService';
 import { bookingService } from './BookingService';
 import Verifications from './Verifications';
 import ReviewModal from './ReviewModal';
 import PaymentModal from './PaymentModal';
-import axios from 'axios';
 import { 
-    Star, StarFill, GeoAlt, Telephone, Clock, 
-    Cash, ShieldCheck, ArrowLeft, CheckCircleFill, PersonCircle, 
-    CalendarEvent, CreditCard
+    StarFill, ArrowLeft, GeoAlt, Telephone, Envelope, 
+    CheckCircleFill, ExclamationCircle, BoxArrowRight, Person
 } from 'react-bootstrap-icons';
 
-
-// --- Zero-Dependency Icons (Inline SVGs) ---
+// --- Custom Icons (Inline SVGs) ---
 const Icons = {
   Calendar: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
   Clock: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
@@ -22,89 +20,131 @@ const Icons = {
   GeoAlt: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
   CheckCircle: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
   XCircle: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
-  ClockHistory: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>,
-  CreditCard: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
   Cash: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><path d="M8 15h.01"/><path d="M16 15h.01"/></svg>,
-  StarFill: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
-  Telephone: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
-  Envelope: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+  Activity: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Briefcase: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
 };
 
-// --- Custom CSS ---
+// --- CSS Styles ---
 const customStyles = `
+  :root {
+    --primary-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+    --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.1);
+  }
+
+  body {
+    background-color: #f0f2f5;
+  }
+
   .profile-bg {
-    background-color: #f8f9fa;
+    background: radial-gradient(circle at 10% 20%, rgb(239, 246, 255) 0%, rgb(219, 228, 255) 90%);
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 60px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  .card-hover {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+
+  /* Glassmorphism Card */
+  .glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative; /* Important for absolute positioning of avatar */
   }
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+
+  .glass-card.hover-effect:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
   }
-  .avatar-container {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+
+  /* Sidebar Specifics */
+  .profile-cover {
+    height: 150px; /* Increased height for better look */
+    background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
+    position: relative;
+  }
+
+  /* THE LOGO/AVATAR WRAPPER - FIXED POSITIONING */
+  .profile-avatar-wrapper {
+    position: absolute;
+    bottom: -50px; /* Pushes it half-way out of the cover */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10; /* Ensures it stays ON TOP of the card content */
+  }
+
+  .avatar-circle {
+    width: 120px;
+    height: 120px;
+    background: white;
+    padding: 6px;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #30cfd0 0%, #330867 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 2.5rem;
+    font-size: 3.5rem;
     font-weight: 700;
-    margin: 0 auto 15px;
-    box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
   }
+
+  /* Custom Tabs */
   .custom-tabs .nav-link {
     border: none;
-    color: #6c757d;
-    font-weight: 500;
-    padding: 12px 20px;
-    border-radius: 8px;
-    transition: all 0.2s;
-  }
-  .custom-tabs .nav-link.active {
-    background-color: #0d6efd;
-    color: white;
-    box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
-  }
-  .custom-tabs .nav-link:hover:not(.active) {
-    background-color: #e9ecef;
-    color: #0d6efd;
-  }
-  .status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: 500;
-    display: inline-flex;
+    color: #64748b;
+    font-weight: 600;
+    padding: 15px 25px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+    display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
-  .info-label {
-    font-size: 0.85rem;
+
+  .custom-tabs .nav-link:hover {
+    background-color: rgba(79, 172, 254, 0.1);
+    color: #00f2fe;
+  }
+
+  .custom-tabs .nav-link.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  .status-badge-modern {
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: #adb5bd;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .info-value {
-    font-weight: 500;
-    color: #212529;
-  }
-  .sidebar-sticky {
-    position: sticky;
-    top: 90px; 
-    z-index: 100;
   }
 `;
-
 const api = axios.create({
   baseURL: 'http://localhost:8080/api',
 });
@@ -135,7 +175,6 @@ function Profile() {
       setUser(response.data);
     } catch (err) {
       console.error('Error fetching profile:', err);
-      // Fallback to localStorage if API fails
       const userData = localStorage.getItem('user');
       if (userData) {
         setUser(JSON.parse(userData));
@@ -150,29 +189,31 @@ function Profile() {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const getTimeGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
+
   if (loading) {
     return (
-      <Container className="mt-5 pt-5">
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" style={{ width: '3rem', height: '3rem' }} />
-          <p className="mt-3 text-muted">Loading profile...</p>
-        </div>
-      </Container>
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+        <Spinner animation="grow" variant="primary" />
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <Container className="mt-5">        
-        <Alert variant="warning" className="shadow-sm border-0">
-          <Alert.Heading>Authentication Required</Alert.Heading>
+      <Container className="mt-5 pt-5">        
+        <Alert variant="warning" className="shadow-sm border-0 rounded-4 p-4 text-center">
+          <ExclamationCircle size={30} className="mb-3" />
+          <h4>Authentication Required</h4>
           <p>You need to be logged in to view your profile.</p>
-          <hr />
-          <div className="d-flex justify-content-end">
-            <Button variant="warning" onClick={() => navigate('/login')}>
-              Login Now
-            </Button>
-          </div>
+          <Button variant="dark" className="rounded-pill px-4" onClick={() => navigate('/login')}>
+            Login Now
+          </Button>
         </Alert>
       </Container>
     );
@@ -181,74 +222,95 @@ function Profile() {
   return (
     <div className="profile-bg">
       <style>{customStyles}</style>
-            {/* --- Back to Home Button --- */}
-      <Button 
-        variant="light" 
-        className="position-absolute top-0 start-0 m-3 shadow-sm rounded-pill d-flex align-items-center fw-bold text-secondary border-0"
-        onClick={() => navigate('/')}
-        style={{ zIndex: 1000, fontSize: '0.9rem', padding: '8px 16px', background: 'rgba(255,255,255,0.9)' }}
-      >
-        <ArrowLeft className="me-2" size={18} /> Home
-      </Button>
+      
+      {/* Top Navigation Area */}
+      <Container fluid className="p-4 d-flex justify-content-between align-items-center">
+        <Button 
+          variant="white" 
+          className="glass-card px-4 py-2 border-0 fw-bold d-flex align-items-center gap-2 text-dark"
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft /> Back Home
+        </Button>
+        <div className="text-end d-none d-md-block">
+          <span className="text-muted small fw-bold text-uppercase">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </span>
+        </div>
+      </Container>
 
-      {/* Header Background */}
-      <div style={{ background: '#fff', padding: '40px 0 20px', borderBottom: '1px solid #eee', marginBottom: '30px' }}>
-        <Container>
-          <h1 className="fw-bold mb-1">My Account</h1>
-          <p className="text-muted mb-0">Manage your personal information and activity</p>
-        </Container>
-      </div>
+      <Container className="pb-5">
+        {/* Header Greeting */}
+        <div className="mb-5 animate-fade-in">
+          <h1 className="display-5 fw-bold text-dark mb-1">
+            {getTimeGreeting()}, <span style={{ background: 'linear-gradient(to right, #4facfe, #00f2fe)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{user.name.split(' ')[0]}</span>
+          </h1>
+          <p className="text-muted lead">Manage your personal information, bookings, and settings.</p>
+        </div>
 
-      <Container>
-        <Row>
-          {/* Sidebar */}
-          <Col lg={4} className="mb-4">
-            <div className="sidebar-sticky">
-              <UserProfileCard user={user} onUserUpdate={updateUserInStorage} />
-            </div>
+        <Row className="g-4">
+          {/* Left Sidebar */}
+          <Col lg={4}>
+             <div className="sticky-top" style={{ top: '20px', zIndex: 10 }}>
+                <UserProfileCard user={user} />
+                
+                {/* Mini Stats Card */}
+                {user.role !== 'ADMIN' && (
+                  <Card className="glass-card mt-4 border-0 p-3">
+                     <div className="d-flex align-items-center gap-3 mb-3">
+                        <div className="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
+                          <Icons.Activity />
+                        </div>
+                        <div>
+                          <h6 className="mb-0 fw-bold">Account Status</h6>
+                          <small className="text-success fw-bold"><CheckCircleFill className="me-1"/> Active & Verified</small>
+                        </div>
+                     </div>
+                     <div className="bg-light rounded-3 p-3">
+                        <div className="d-flex justify-content-between mb-1">
+                          <small className="fw-bold text-muted">Profile Strength</small>
+                          <small className="fw-bold text-primary">Excellent</small>
+                        </div>
+                        <ProgressBar now={100} variant="info" style={{height: '6px'}} className="rounded-pill" />
+                     </div>
+                  </Card>
+                )}
+             </div>
           </Col>
 
-          {/* Main Content */}
+          {/* Main Content Area */}
           <Col lg={8}>
-            <Card className="border-0 shadow-sm rounded-4 overflow-hidden">
-              <Card.Header className="bg-white border-bottom p-0">
+            <Card className="glass-card border-0" style={{ minHeight: '600px' }}>
+              <Card.Header className="bg-transparent border-0 pt-4 px-4">
                 <Tabs
                   activeKey={activeTab}
                   onSelect={(k) => setActiveTab(k)}
-                  className="custom-tabs border-0 p-3"
-                  variant="pills"
+                  className="custom-tabs border-0"
                 >
-                  <Tab eventKey="profile" title="Profile Info">
-                    <div className="p-4">
-                      <ProfileInfo user={user} onUserUpdate={updateUserInStorage} />
-                    </div>
-                  </Tab>
-
+                  <Tab eventKey="profile" title={<span><Icons.Person /> Profile</span>} />
+                  
                   {(user.role === 'PROVIDER' || user.role === 'USER') && (
-                    <Tab eventKey="bookings" title="Bookings">
-                      <div className="p-4 bg-light bg-opacity-25">
-                        <MyBookings user={user} />
-                      </div>
-                    </Tab>
+                    <Tab eventKey="bookings" title={<span><Icons.Calendar /> Bookings</span>} />
                   )}
-
+                  
                   {user.role === 'ADMIN' && (
-                    <Tab eventKey="admin" title="Admin Panel">
-                      <div className="p-4">
-                        <AdminPanel user={user} />
-                      </div>
-                    </Tab>
+                     <Tab eventKey="admin" title={<span><Icons.Briefcase /> Admin</span>} />
                   )}
                   
                   {(user.role === 'PROVIDER' || user.role === 'USER') && (
-                    <Tab eventKey="addresses" title="Addresses">
-                      <div className="p-4">
-                        <MyAddresses user={user} />
-                      </div>
-                    </Tab>
+                    <Tab eventKey="addresses" title={<span><GeoAlt size={14}/> Addresses</span>} />
                   )}
                 </Tabs>
               </Card.Header>
+              
+              <Card.Body className="px-4 pb-4">
+                 <div className="animate-fade-in">
+                    {activeTab === 'profile' && <ProfileInfo user={user} onUserUpdate={updateUserInStorage} />}
+                    {activeTab === 'bookings' && <MyBookings user={user} />}
+                    {activeTab === 'admin' && <AdminPanel user={user} />}
+                    {activeTab === 'addresses' && <MyAddresses user={user} />}
+                 </div>
+              </Card.Body>
             </Card>
           </Col>
         </Row>
@@ -257,8 +319,9 @@ function Profile() {
   );
 }
 
-// User Profile Card Component
-function UserProfileCard({ user, onUserUpdate }) {
+// --- Sub-Components ---
+
+function UserProfileCard({ user }) {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -268,391 +331,241 @@ function UserProfileCard({ user, onUserUpdate }) {
     navigate('/');
     window.location.reload();
   };
-
-  const getRoleBadgeVariant = (role) => {
-    switch (role) {
-      case 'ADMIN': return 'danger';
-      case 'PROVIDER': return 'info';
-      default: return 'primary';
-    }
+  
+  const roleColors = {
+    ADMIN: 'linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%)',
+    PROVIDER: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
+    USER: 'linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)'
   };
-
-  // Show setup reminder for new providers without service details
-  const showProviderSetupReminder = user?.role === 'PROVIDER' && 
-    (!user.serviceCharge && !user.experience);
 
   return (
     <>
-      <Card className="card-hover border-0">
-        <Card.Body className="text-center p-4">
-          {/* Profile Avatar */}
-          <div className="avatar-container">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-
-          <h4 className="fw-bold mb-1">{user.name}</h4>
-          <Badge bg={getRoleBadgeVariant(user.role)} className="mb-4 px-3 py-2 rounded-pill">
+    <div className="glass-card pb-3">
+      {/* 1. UPPER SIDE: Profile Cover & Main Logo */}
+      <div className="profile-cover">
+         <div className="profile-avatar-wrapper">
+            <div className="avatar-circle">
+              <div className="avatar-img">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
+            </div>
+         </div>
+      </div>
+      
+      {/* 2. Content below the header */}
+      <div className="text-center px-4">
+        {/* Margin top ensures text doesn't hide behind the avatar */}
+        <div style={{ marginTop: '70px' }}>
+          <h3 className="fw-bold mb-1">{user.name}</h3>
+          <Badge className="px-3 py-2 rounded-pill border-0 text-dark mb-3 shadow-sm" style={{ background: roleColors[user.role] || '#eee' }}>
             {user.role}
           </Badge>
-
-          {/* Setup reminder for new providers */}
-          {showProviderSetupReminder && (
-            <Alert variant="info" className="small py-2 mb-3 border-0 bg-info bg-opacity-10 text-info">
-              <strong>Complete Profile!</strong> Add details to get bookings.
-            </Alert>
-          )}
-
-          <ListGroup variant="flush" className="text-start mb-4">
-            <ListGroup.Item className="border-0 px-0 py-2 d-flex align-items-center">
-              <div className="bg-light rounded-circle p-2 me-3 text-primary"><Icons.Envelope /></div>
-              <div>
-                <div className="info-label">Email</div>
-                <div className="info-value">{user.email}</div>
-              </div>
-            </ListGroup.Item>
-            
-            <ListGroup.Item className="border-0 px-0 py-2 d-flex align-items-center">
-              <div className="bg-light rounded-circle p-2 me-3 text-primary"><Icons.Telephone /></div>
-              <div>
-                <div className="info-label">Phone</div>
-                <div className="info-value">{user.phone}</div>
-              </div>
-            </ListGroup.Item>
-
-            {user.serviceType && (
-              <ListGroup.Item className="border-0 px-0 py-2 d-flex align-items-center">
-                <div className="bg-light rounded-circle p-2 me-3 text-primary"><Icons.Person /></div>
-                <div>
-                  <div className="info-label">Service Type</div>
-                  <div className="info-value">{user.serviceType}</div>
-                </div>
-              </ListGroup.Item>
-            )}
-            
-            {user.serviceCharge && (
-              <ListGroup.Item className="border-0 px-0 py-2 d-flex align-items-center">
-                <div className="bg-light rounded-circle p-2 me-3 text-primary"><Icons.Cash /></div>
-                <div>
-                  <div className="info-label">Rate</div>
-                  <div className="info-value">₹{user.serviceCharge}/hour</div>
-                </div>
-              </ListGroup.Item>
-            )}
-            
+          
+          <div className="d-flex justify-content-center gap-2 mb-4">
             {user.rating > 0 && (
-              <ListGroup.Item className="border-0 px-0 py-2 d-flex align-items-center">
-                <div className="bg-light rounded-circle p-2 me-3 text-warning"><Icons.StarFill /></div>
-                <div>
-                  <div className="info-label">Rating</div>
-                  <div className="info-value">{user.rating} ({user.totalRatings || 0} reviews)</div>
-                </div>
-              </ListGroup.Item>
+                <Badge bg="warning" text="dark" className="d-flex align-items-center gap-1 rounded-pill px-3 py-2">
+                    <StarFill /> {user.rating} ({user.totalRatings || 0})
+                </Badge>
             )}
-          </ListGroup>
-
-          <div className="d-grid gap-2">
-            <Button
-              variant="outline-danger"
-              className="rounded-pill py-2 border-2 fw-bold"
-              onClick={() => setShowLogoutModal(true)}
-            >
-              Log Out
-            </Button>
+             {user.serviceCharge && (
+                <Badge bg="light" text="dark" className="d-flex align-items-center gap-1 rounded-pill px-3 py-2 border">
+                    <Icons.Cash /> ₹{user.serviceCharge}/hr
+                </Badge>
+            )}
           </div>
-        </Card.Body>
-      </Card>
 
-      {/* Logout Confirmation Modal */}
-      <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)} centered>
-        <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fw-bold">Confirm Logout</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="py-4">
-          Are you sure you want to end your session?
+          <div className="bg-white rounded-4 p-3 text-start shadow-sm mb-4 border">
+             <div className="d-flex align-items-center gap-3 mb-3">
+                <div className="bg-light p-2 rounded-circle text-primary"><Envelope size={18}/></div>
+                <div className="text-truncate">
+                    <small className="text-muted d-block text-uppercase fw-bold" style={{fontSize: '0.65rem'}}>Email</small>
+                    <span className="fw-medium small" title={user.email}>{user.email}</span>
+                </div>
+             </div>
+             <div className="d-flex align-items-center gap-3">
+                <div className="bg-light p-2 rounded-circle text-primary"><Telephone size={18}/></div>
+                <div>
+                    <small className="text-muted d-block text-uppercase fw-bold" style={{fontSize: '0.65rem'}}>Phone</small>
+                    <span className="fw-medium small">{user.phone}</span>
+                </div>
+             </div>
+          </div>
+
+          {/* 3. LOGOUT BUTTON - Cleaned up (Fixed the broken logo issue) */}
+          <Button 
+            variant="outline-danger" 
+            className="w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2" 
+            onClick={() => setShowLogoutModal(true)}
+          >
+            {/* Using a standard icon instead of a broken image */}
+            <BoxArrowRight size={20} /> 
+            Sign Out
+          </Button>
+        </div>
+      </div>
+    </div>
+
+    {/* Logout Confirmation Modal */}
+    <Modal show={showLogoutModal} onHide={() => setShowLogoutModal(false)} centered contentClassName="border-0 rounded-4 shadow-lg overflow-hidden">
+        <div style={{ background: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)', height: '100px' }} className="position-relative">
+            <div className="position-absolute top-100 start-50 translate-middle">
+                 <div className="avatar-circle shadow-sm bg-white p-1" style={{width:'80px', height:'80px'}}>
+                    <div className="avatar-img text-white bg-danger" style={{fontSize:'2rem'}}>
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <Modal.Body className="pt-5 pb-4 text-center mt-3">
+          <h5 className="fw-bold">Ready to leave?</h5>
+          <p className="text-muted small px-4">You are currently logged in as <strong>{user.email}</strong>.</p>
         </Modal.Body>
-        <Modal.Footer className="border-0 pt-0">
-          <Button variant="light" onClick={() => setShowLogoutModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleLogout}>
-            Yes, Logout
-          </Button>
+        
+        <Modal.Footer className="border-0 pt-0 pb-4 justify-content-center gap-2">
+          <Button variant="light" className="px-4 rounded-pill fw-bold" onClick={() => setShowLogoutModal(false)}>Stay</Button>
+          <Button variant="danger" className="px-4 rounded-pill fw-bold" onClick={handleLogout}>Logout</Button>
         </Modal.Footer>
-      </Modal>
+    </Modal>
     </>
   );
 }
-
-// Profile Information Component
 function ProfileInfo({ user, onUserUpdate }) {
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    name: user.name || '',
-    phone: user.phone || '',
-    serviceType: user.serviceType || '',
-    serviceCharge: user.serviceCharge || '',
-    experience: user.experience || ''
-  });
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setMessage('');
-
-    try {
-      // Validate provider fields
-      if (user.role === 'PROVIDER') {
-        if (formData.serviceCharge && parseFloat(formData.serviceCharge) < 0) {
-          setError('Service charge cannot be negative.');
-          setLoading(false);
-          return;
-        }
-        if (formData.experience && parseInt(formData.experience) < 0) {
-          setError('Experience cannot be negative.');
-          setLoading(false);
-          return;
-        }
-      }
-
-      const updateData = {
-        name: formData.name,
-        phone: formData.phone,
-        ...(user.role === 'PROVIDER' && {
-          serviceType: formData.serviceType,
-          serviceCharge: formData.serviceCharge ? parseFloat(formData.serviceCharge) : null,
-          experience: formData.experience ? parseInt(formData.experience) : null
-        })
-      };
-
-      const response = await api.put('/users/profile', updateData);
-      
-      setMessage('Profile updated successfully!');
-      
-      // Update local user data
-      const updatedUser = { 
-        ...user, 
-        ...updateData,
-        serviceCharge: updateData.serviceCharge,
-        experience: updateData.experience
-      };
-      onUserUpdate(updatedUser);
-
-      setEditMode(false);
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
-      console.error('Update error:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to update profile. Please try again.';
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
+    const [editMode, setEditMode] = useState(false);
+    const [formData, setFormData] = useState({
+        name: user.name || '',
+        phone: user.phone || '',
+        serviceType: user.serviceType || '',
+        serviceCharge: user.serviceCharge || '',
+        experience: user.experience || ''
     });
-  };
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
-  const handleCancelEdit = () => {
-    setFormData({
-      name: user.name || '',
-      phone: user.phone || '',
-      serviceType: user.serviceType || '',
-      serviceCharge: user.serviceCharge || '',
-      experience: user.experience || ''
-    });
-    setEditMode(false);
-    setError('');
-    setMessage('');
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        
+        try {
+            const updateData = {
+                name: formData.name,
+                phone: formData.phone,
+                ...(user.role === 'PROVIDER' && {
+                  serviceType: formData.serviceType,
+                  serviceCharge: formData.serviceCharge ? parseFloat(formData.serviceCharge) : null,
+                  experience: formData.experience ? parseInt(formData.experience) : null
+                })
+            };
 
-  return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h5 className="fw-bold m-0 text-primary">Personal Information</h5>
-        <Button
-          variant={editMode ? "light" : "outline-primary"}
-          size="sm"
-          className="rounded-pill px-3"
-          onClick={() => setEditMode(!editMode)}
-          disabled={loading}
-        >
-          {editMode ? 'Cancel Edit' : 'Edit Profile'}
-        </Button>
-      </div>
+            await api.put('/users/profile', updateData);
+            
+            onUserUpdate({ ...user, ...updateData });
+            setEditMode(false);
+            setMessage("Profile Updated Successfully!");
+            setTimeout(() => setMessage(''), 3000);
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to update profile");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      {message && <Alert variant="success" className="border-0 shadow-sm"><Icons.CheckCircle /> {message}</Alert>}
-      {error && <Alert variant="danger" className="border-0 shadow-sm"><Icons.XCircle /> {error}</Alert>}
-
-      {editMode ? (
-        <Form onSubmit={handleSubmit} className="bg-light p-4 rounded-3">
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold">Full Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold">Phone Number</Form.Label>
-                <Form.Control
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-
-          {user.role === 'PROVIDER' && (
-            <>
-              <Form.Group className="mb-3">
-                <Form.Label className="small fw-bold">Service Type</Form.Label>
-                <Form.Control
-                  type="text"
-                  name="serviceType"
-                  value={formData.serviceType}
-                  onChange={handleChange}
-                  required
-                  placeholder="e.g., Plumber, Electrician, Tutor"
-                  disabled={loading}
-                />
-              </Form.Group>
-
-              <Row>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="small fw-bold">Service Charge (₹/hour)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="serviceCharge"
-                      value={formData.serviceCharge}
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      placeholder="e.g., 500"
-                      disabled={loading}
-                    />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group className="mb-3">
-                    <Form.Label className="small fw-bold">Experience (Years)</Form.Label>
-                    <Form.Control
-                      type="number"
-                      name="experience"
-                      value={formData.experience}
-                      onChange={handleChange}
-                      min="0"
-                      placeholder="e.g., 5"
-                      disabled={loading}
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
-          )}
-
-          <div className="d-flex gap-2 mt-3 justify-content-end">
-            <Button variant="white" onClick={handleCancelEdit} disabled={loading}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={loading} className="px-4">
-              {loading ? <Spinner animation="border" size="sm" /> : 'Save Changes'}
-            </Button>
-          </div>
-        </Form>
-      ) : (
-        <Row className="g-4">
-          <Col md={6}>
-            <div className="p-3 border rounded bg-white h-100">
-              <div className="info-label">Name</div>
-              <div className="fw-medium">{user.name}</div>
-            </div>
-          </Col>
-          <Col md={6}>
-            <div className="p-3 border rounded bg-white h-100">
-              <div className="info-label">Email</div>
-              <div className="fw-medium">{user.email}</div>
-            </div>
-          </Col>
-          <Col md={6}>
-            <div className="p-3 border rounded bg-white h-100">
-              <div className="info-label">Phone</div>
-              <div className="fw-medium">{user.phone}</div>
-            </div>
-          </Col>
-          <Col md={6}>
-            <div className="p-3 border rounded bg-white h-100">
-              <div className="info-label">Role</div>
-              <div>
-                <Badge bg={user.role === 'ADMIN' ? 'danger' : user.role === 'PROVIDER' ? 'info' : 'primary'}>
-                  {user.role}
-                </Badge>
-              </div>
-            </div>
-          </Col>
-          
-          {user.role === 'PROVIDER' && (
-            <>
-              <Col md={6}>
-                <div className="p-3 border rounded bg-white h-100">
-                  <div className="info-label">Service Type</div>
-                  <div className="fw-medium">{user.serviceType || 'Not specified'}</div>
+    return (
+        <div>
+            <div className="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+                <div>
+                    <h4 className="fw-bold mb-1">Profile Details</h4>
+                    <p className="text-muted mb-0 small">View and update your personal information</p>
                 </div>
-              </Col>
-              <Col md={6}>
-                <div className="p-3 border rounded bg-white h-100">
-                  <div className="info-label">Service Charge</div>
-                  <div className="fw-medium text-success">
-                    {user.serviceCharge ? `₹${user.serviceCharge}/hour` : <span className="text-muted fst-italic">Not set</span>}
-                  </div>
-                </div>
-              </Col>
-              <Col md={6}>
-                <div className="p-3 border rounded bg-white h-100">
-                  <div className="info-label">Experience</div>
-                  <div className="fw-medium">
-                    {user.experience ? `${user.experience} years` : <span className="text-muted fst-italic">Not specified</span>}
-                  </div>
-                </div>
-              </Col>
-            </>
-          )}
-        </Row>
-      )}
-    </div>
-  );
+                <Button variant={editMode ? "light" : "dark"} size="sm" className="rounded-pill px-3 shadow-sm" onClick={() => setEditMode(!editMode)}>
+                    {editMode ? 'Cancel Edit' : 'Edit Details'}
+                </Button>
+            </div>
+
+            {message && <Alert variant="success" className="rounded-pill py-2 text-center border-0 bg-success bg-opacity-25 text-success fw-bold">{message}</Alert>}
+            {error && <Alert variant="danger" className="rounded-pill py-2 text-center border-0">{error}</Alert>}
+
+            {editMode ? (
+                 <Form onSubmit={handleSubmit}>
+                    <Row className="g-3">
+                        <Col md={6}>
+                            <Form.Label className="small fw-bold text-muted">Full Name</Form.Label>
+                            <Form.Control type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="rounded-3 border-light bg-light py-2" required />
+                        </Col>
+                        <Col md={6}>
+                             <Form.Label className="small fw-bold text-muted">Phone Number</Form.Label>
+                             <Form.Control type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="rounded-3 border-light bg-light py-2" required />
+                        </Col>
+                        
+                        {user.role === 'PROVIDER' && (
+                             <>
+                                <Col md={12}>
+                                    <Form.Label className="small fw-bold text-muted">Service Type</Form.Label>
+                                    <Form.Control type="text" value={formData.serviceType} onChange={e => setFormData({...formData, serviceType: e.target.value})} className="rounded-3 border-light bg-light py-2" placeholder="e.g. Plumber" />
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Label className="small fw-bold text-muted">Service Charge (₹/hr)</Form.Label>
+                                    <Form.Control type="number" value={formData.serviceCharge} onChange={e => setFormData({...formData, serviceCharge: e.target.value})} className="rounded-3 border-light bg-light py-2" />
+                                </Col>
+                                <Col md={6}>
+                                    <Form.Label className="small fw-bold text-muted">Experience (Years)</Form.Label>
+                                    <Form.Control type="number" value={formData.experience} onChange={e => setFormData({...formData, experience: e.target.value})} className="rounded-3 border-light bg-light py-2" />
+                                </Col>
+                             </>
+                        )}
+                        <Col md={12} className="text-end mt-4">
+                            <Button type="submit" disabled={loading} className="rounded-pill px-4" variant="primary">
+                                {loading ? <Spinner size="sm" animation="border"/> : 'Save Changes'}
+                            </Button>
+                        </Col>
+                    </Row>
+                 </Form>
+            ) : (
+                <Row className="g-4">
+                    <Col md={6}>
+                        <div className="p-3 bg-light bg-opacity-50 rounded-4 h-100 border border-light">
+                            <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Full Name</small>
+                            <div className="fw-bold text-dark fs-5">{user.name}</div>
+                        </div>
+                    </Col>
+                    <Col md={6}>
+                        <div className="p-3 bg-light bg-opacity-50 rounded-4 h-100 border border-light">
+                            <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Email Address</small>
+                            <div className="fw-bold text-dark fs-5">{user.email}</div>
+                        </div>
+                    </Col>
+                     <Col md={6}>
+                        <div className="p-3 bg-light bg-opacity-50 rounded-4 h-100 border border-light">
+                            <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Mobile</small>
+                            <div className="fw-bold text-dark fs-5">{user.phone}</div>
+                        </div>
+                    </Col>
+                    
+                    {user.role === 'PROVIDER' && (
+                        <Col md={6}>
+                            <div className="p-3 bg-info bg-opacity-10 rounded-4 h-100 border border-info border-opacity-25">
+                                <small className="text-uppercase text-info fw-bold" style={{fontSize:'0.7rem'}}>Provider Stats</small>
+                                <div className="fw-bold text-dark">
+                                    {user.serviceType || 'N/A'} • {user.experience ? `${user.experience} Yrs Exp.` : 'No Exp. Listed'}
+                                </div>
+                            </div>
+                        </Col>
+                    )}
+                </Row>
+            )}
+        </div>
+    );
 }
 
 function MyBookings({ user }) {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [selectedBookingForReview, setSelectedBookingForReview] = useState(null);
-    const [selectedBookingForPayment, setSelectedBookingForPayment] = useState(null);
     const [paymentAmount, setPaymentAmount] = useState(0);
     const [showAmountModal, setShowAmountModal] = useState(false);
 
@@ -663,68 +576,37 @@ function MyBookings({ user }) {
     const fetchUserBookings = async () => {
         try {
             setLoading(true);
-            setError('');
             const bookingsData = await bookingService.getUserBookingsWithReviews();
-            setBookings(bookingsData);
+            
+            // Sort by createdAt desc (newest first)
+            const sortedBookings = [...bookingsData].sort((a, b) => {
+                if (a.createdAt && b.createdAt) {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+                return b.id - a.id;
+            });
+            
+            setBookings(sortedBookings);
         } catch (err) {
-            setError('Failed to load your bookings');
+            console.error("Error fetching bookings", err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleReviewSubmitted = () => {
-        fetchUserBookings();
-    };
-
-    const handlePaymentSuccess = (paymentData) => {
-        console.log('Payment successful:', paymentData);
-        fetchUserBookings();
-        alert('Payment completed successfully! Booking confirmed.');
-    };
-
-    const getStatusBadge = (status) => {
-        const statusConfig = {
-            'PENDING': { variant: 'warning', text: 'Pending', icon: <Icons.ClockHistory /> },
-            'CONFIRMED': { variant: 'success', text: 'Confirmed', icon: <Icons.CheckCircle /> },
-            'IN_PROGRESS': { variant: 'info', text: 'In Progress', icon: <Icons.Clock /> },
-            'COMPLETED': { variant: 'primary', text: 'Completed', icon: <Icons.CheckCircle /> },
-            'CANCELLED': { variant: 'danger', text: 'Cancelled', icon: <Icons.XCircle /> },
-            'REJECTED': { variant: 'secondary', text: 'Rejected', icon: <Icons.XCircle /> },
-            'PAYMENT_PENDING': { variant: 'warning', text: 'Payment Pending', icon: <Icons.CreditCard /> }
-        };
-
-        const config = statusConfig[status] || { variant: 'secondary', text: status };
-        return (
-            <div className={`status-badge bg-${config.variant} bg-opacity-10 text-${config.variant} border border-${config.variant}`}>
-                {config.icon} {config.text}
-            </div>
-        );
-    };
-
-    const getStatusMessage = (status) => {
-        const messages = {
-            'PENDING': 'Your booking is pending confirmation from the service provider.',
-            'CONFIRMED': 'Your booking has been confirmed! The service provider will contact you soon.',
-            'IN_PROGRESS': 'Your service is currently in progress.',
-            'COMPLETED': 'Service completed successfully. Please proceed with payment.',
-            'CANCELLED': 'This booking has been cancelled.',
-            'REJECTED': 'Sorry, the service provider was unable to accept your booking.',
-            'PAYMENT_PENDING': 'Service completed. Please complete the payment to confirm your booking.'
-        };
-        return messages[status] || '';
-    };
-
-    const canReviewBooking = (booking) => {
-        return booking.status === 'COMPLETED' && !booking.hasReviewed;
-    };
-
-    const canMakePayment = (booking) => {
-        return booking.status === 'COMPLETED' && !booking.isPaid;
+    // Helper for badge style
+    const getStatusStyle = (status) => {
+        switch(status) {
+            case 'CONFIRMED': return { bg: '#d1e7dd', color: '#0f5132', icon: <CheckCircleFill /> };
+            case 'PENDING': return { bg: '#fff3cd', color: '#856404', icon: <Icons.Clock /> };
+            case 'COMPLETED': return { bg: '#cfe2ff', color: '#084298', icon: <StarFill /> };
+            case 'CANCELLED': return { bg: '#f8d7da', color: '#842029', icon: <ExclamationCircle /> };
+            default: return { bg: '#e2e3e5', color: '#41464b', icon: <Icons.Activity /> };
+        }
     };
 
     const handlePaymentClick = (booking) => {
-        setSelectedBookingForPayment(booking);
+        setSelectedBooking(booking);
         if (booking.totalAmount && booking.totalAmount > 0) {
             setPaymentAmount(booking.totalAmount);
             setShowPaymentModal(true);
@@ -742,184 +624,131 @@ function MyBookings({ user }) {
         }
     };
 
-    const renderPaymentButton = (booking) => {
-        if (canMakePayment(booking)) {
-            return (
-                <Button variant="warning" size="sm" className="w-100 mt-2 fw-bold text-dark" onClick={() => handlePaymentClick(booking)}>
-                    <Icons.CreditCard /> Pay Now
-                </Button>
-            );
-        } else if (booking.isPaid) {
-            return (
-                <div className="mt-2 w-100 text-center text-success small fw-bold bg-success bg-opacity-10 py-1 rounded">
-                    <Icons.CheckCircle /> Paid
+    const BookingCard = ({ booking }) => {
+        const style = getStatusStyle(booking.status);
+        return (
+            <Col md={12} className="mb-3">
+                <div className="glass-card hover-effect p-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="rounded-3 p-3 d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px', background: style.bg, color: style.color }}>
+                            {style.icon}
+                        </div>
+                        <div>
+                            <h6 className="fw-bold mb-1">{booking.serviceType}</h6>
+                            <div className="small text-muted mb-1"><Icons.Person /> {booking.providerName}</div>
+                            <div className="small fw-medium text-primary"><Icons.Calendar /> {new Date(booking.bookingDate).toLocaleDateString()} • {booking.bookingTime}</div>
+                        </div>
+                    </div>
+                    
+                    <div className="text-end d-flex flex-column gap-2 align-items-end">
+                        <span className="status-badge-modern" style={{ background: style.bg, color: style.color }}>
+                            {booking.status}
+                        </span>
+                        {booking.totalAmount > 0 && <span className="fw-bold fs-5 text-dark">₹{booking.totalAmount}</span>}
+                    </div>
+                    
+                    <div className="w-100 border-top pt-2 mt-2 d-flex gap-2 justify-content-end align-items-center">
+                         <Button variant="light" size="sm" className="rounded-pill px-3 fw-bold text-muted" onClick={() => { setSelectedBooking(booking); setShowDetailModal(true); }}>
+                            View Details
+                         </Button>
+                         
+                         {/* Payment Button */}
+                         {booking.status === 'COMPLETED' && !booking.isPaid && (
+                            <Button variant="dark" size="sm" className="rounded-pill px-3 fw-bold" onClick={() => handlePaymentClick(booking)}>
+                                Pay Now
+                            </Button>
+                         )}
+                         {booking.status === 'COMPLETED' && booking.isPaid && (
+                             <span className="text-success small fw-bold d-flex align-items-center gap-1 mx-2">
+                                <CheckCircleFill /> Paid
+                             </span>
+                         )}
+                         
+                         {/* Review Button & Logic */}
+                         {booking.status === 'COMPLETED' && !booking.hasReviewed && (
+                            <Button variant="primary" size="sm" className="rounded-pill px-3 fw-bold" onClick={() => { setSelectedBooking(booking); setShowReviewModal(true); }}>
+                                Review
+                            </Button>
+                         )}
+                         {booking.status === 'COMPLETED' && booking.hasReviewed && (
+                             <span className="text-primary small fw-bold d-flex align-items-center gap-1 mx-2">
+                                <StarFill /> Reviewed
+                             </span>
+                         )}
+                    </div>
                 </div>
-            );
-        }
-        return null;
+            </Col>
+        );
     };
 
-    const renderReviewButton = (booking) => {
-        if (canReviewBooking(booking)) {
-            return (
-                <Button variant="success" size="sm" className="w-100 mt-2" onClick={() => {
-                    setSelectedBookingForReview(booking);
-                    setShowReviewModal(true);
-                }}>
-                    <Icons.StarFill /> Rate & Review
-                </Button>
-            );
-        } else if (booking.status === 'COMPLETED' && booking.hasReviewed) {
-            return (
-                <div className="mt-2 w-100 text-center text-primary small fw-bold bg-primary bg-opacity-10 py-1 rounded">
-                    <Icons.CheckCircle /> Reviewed
-                </div>
-            );
-        }
-        return null;
-    };
+    if (loading) return <div className="text-center py-5"><Spinner animation="border" /> Loading bookings...</div>;
 
     const pendingBookings = bookings.filter(b => b.status === 'PENDING');
     const confirmedBookings = bookings.filter(b => b.status === 'CONFIRMED' || b.status === 'IN_PROGRESS');
     const completedBookings = bookings.filter(b => b.status === 'COMPLETED');
 
-    const BookingCard = ({ booking }) => (
-        <Col md={6} lg={6} className="mb-4">
-            <Card className="card-hover h-100 border-0 shadow-sm">
-                <Card.Body>
-                    <div className="d-flex justify-content-between align-items-start mb-3">
-                        <h6 className="fw-bold text-dark mb-0">{booking.serviceType}</h6>
-                        {getStatusBadge(booking.status)}
-                    </div>
-
-                    <div className="mb-3 small">
-                        <div className="d-flex align-items-center mb-2 text-muted">
-                            <Icons.Person /> <span className="ms-2">{booking.providerName}</span>
-                        </div>
-                        <div className="d-flex align-items-center mb-2 text-muted">
-                            <Icons.Calendar /> <span className="ms-2">{new Date(booking.bookingDate).toLocaleDateString()} at {booking.bookingTime}</span>
-                        </div>
-                        {booking.totalAmount > 0 && (
-                            <div className="d-flex align-items-center text-success fw-bold">
-                                <Icons.Cash /> <span className="ms-2">₹{booking.totalAmount}</span>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="d-grid gap-2">
-                        <Button variant="light" size="sm" className="text-primary fw-medium" onClick={() => {
-                            setSelectedBooking(booking);
-                            setShowDetailModal(true);
-                        }}>
-                            View Details
-                        </Button>
-                        {renderPaymentButton(booking)}
-                        {renderReviewButton(booking)}
-                    </div>
-                </Card.Body>
-            </Card>
-        </Col>
-    );
-
-    if (loading) return <div className="text-center py-5"><Spinner animation="border" size="sm" /> Loading...</div>;
-
     return (
         <div>
-            {error && <Alert variant="danger">{error}</Alert>}
-
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                 <h4 className="fw-bold m-0">My Bookings</h4>
+                 <Badge bg="light" text="dark" className="border">Total: {bookings.length}</Badge>
+            </div>
+            
             {bookings.length === 0 ? (
-                <div className="text-center py-5">
-                    <div className="display-4 text-muted mb-3 opacity-50"><Icons.Calendar /></div>
-                    <h5>No Bookings Yet</h5>
-                    <p className="text-muted">You haven't made any service bookings yet.</p>
-                </div>
+                 <div className="text-center py-5 opacity-50">
+                    <div className="display-1 mb-3">🎫</div>
+                    <h5>No active bookings found</h5>
+                    <p>When you book a service, it will appear here.</p>
+                 </div>
             ) : (
                 <Tabs defaultActiveKey="all" className="custom-tabs mb-4 border-bottom-0" variant="pills">
                     <Tab eventKey="all" title="All">
                         <Row>{bookings.map(booking => <BookingCard key={booking.id} booking={booking} />)}</Row>
                     </Tab>
                     <Tab eventKey="pending" title="Pending">
-                        <Row>{pendingBookings.map(booking => <BookingCard key={booking.id} booking={booking} />)}</Row>
+                        <Row>{pendingBookings.length > 0 ? pendingBookings.map(booking => <BookingCard key={booking.id} booking={booking} />) : <div className="text-center p-4 text-muted">No pending bookings</div>}</Row>
                     </Tab>
-                    <Tab eventKey="confirmed" title="Active">
-                        <Row>{confirmedBookings.map(booking => <BookingCard key={booking.id} booking={booking} />)}</Row>
+                    <Tab eventKey="active" title="Active">
+                        <Row>{confirmedBookings.length > 0 ? confirmedBookings.map(booking => <BookingCard key={booking.id} booking={booking} />) : <div className="text-center p-4 text-muted">No active bookings</div>}</Row>
                     </Tab>
                     <Tab eventKey="completed" title="Completed">
-                        <Row>{completedBookings.map(booking => <BookingCard key={booking.id} booking={booking} />)}</Row>
+                        <Row>{completedBookings.length > 0 ? completedBookings.map(booking => <BookingCard key={booking.id} booking={booking} />) : <div className="text-center p-4 text-muted">No completed bookings</div>}</Row>
                     </Tab>
                 </Tabs>
             )}
 
-            {/* Booking Detail Modal */}
-            <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} size="lg" centered>
-                <Modal.Header closeButton className="border-0 pb-0">
-                    <Modal.Title className="fw-bold">Booking Details</Modal.Title>
-                </Modal.Header>
-                <Modal.Body className="pt-2">
+            {/* Detail Modal */}
+            <Modal show={showDetailModal} onHide={() => setShowDetailModal(false)} centered>
+                <Modal.Header closeButton><Modal.Title className="fw-bold">Booking Details</Modal.Title></Modal.Header>
+                <Modal.Body>
                     {selectedBooking && (
-                        <>
-                            <div className="mb-4 p-3 bg-light rounded">
-                                <div className="d-flex justify-content-between align-items-center">
-                                    {getStatusBadge(selectedBooking.status)}
-                                    <span className="small text-muted">{new Date(selectedBooking.createdAt).toLocaleDateString()}</span>
-                                </div>
-                                <p className="mt-2 mb-0 small text-muted">{getStatusMessage(selectedBooking.status)}</p>
+                        <div>
+                            <div className="p-3 bg-light rounded mb-3">
+                                <h6 className="fw-bold mb-1">{selectedBooking.serviceType}</h6>
+                                <p className="mb-0 text-muted small">Status: {selectedBooking.status}</p>
                             </div>
-
-                            <Row className="g-4">
-                                <Col md={6}>
-                                    <h6 className="fw-bold text-primary mb-3">Service Info</h6>
-                                    <ListGroup variant="flush" className="small">
-                                        <ListGroup.Item className="d-flex justify-content-between px-0">
-                                            <span className="text-muted">Type</span>
-                                            <span className="fw-medium">{selectedBooking.serviceType}</span>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item className="d-flex justify-content-between px-0">
-                                            <span className="text-muted">Date</span>
-                                            <span className="fw-medium">{new Date(selectedBooking.bookingDate).toLocaleDateString()}</span>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item className="d-flex justify-content-between px-0">
-                                            <span className="text-muted">Time</span>
-                                            <span className="fw-medium">{selectedBooking.bookingTime}</span>
-                                        </ListGroup.Item>
-                                    </ListGroup>
-                                </Col>
-                                <Col md={6}>
-                                    <h6 className="fw-bold text-primary mb-3">Provider Info</h6>
-                                    <ListGroup variant="flush" className="small">
-                                        <ListGroup.Item className="d-flex justify-content-between px-0">
-                                            <span className="text-muted">Name</span>
-                                            <span className="fw-medium">{selectedBooking.providerName}</span>
-                                        </ListGroup.Item>
-                                        <ListGroup.Item className="d-flex justify-content-between px-0">
-                                            <span className="text-muted">Contact</span>
-                                            <span className="fw-medium">{selectedBooking.providerPhone}</span>
-                                        </ListGroup.Item>
-                                    </ListGroup>
-                                </Col>
-                            </Row>
-                            
-                            {selectedBooking.address && (
-                                <div className="mt-4 p-3 border rounded bg-white">
-                                    <h6 className="fw-bold mb-2 small text-uppercase text-muted"><Icons.GeoAlt /> Location</h6>
-                                    <div className="small">
-                                        <strong>{selectedBooking.address.name}</strong><br />
-                                        {selectedBooking.address.address}<br />
-                                        {selectedBooking.address.city}, {selectedBooking.address.pincode}
-                                    </div>
-                                </div>
-                            )}
-                        </>
+                            <ListGroup variant="flush" className="small">
+                                <ListGroup.Item className="d-flex justify-content-between"><span>Provider:</span> <strong>{selectedBooking.providerName}</strong></ListGroup.Item>
+                                <ListGroup.Item className="d-flex justify-content-between"><span>Date:</span> <strong>{new Date(selectedBooking.bookingDate).toLocaleDateString()}</strong></ListGroup.Item>
+                                <ListGroup.Item className="d-flex justify-content-between"><span>Time:</span> <strong>{selectedBooking.bookingTime}</strong></ListGroup.Item>
+                                {selectedBooking.address && (
+                                    <ListGroup.Item>
+                                        <div className="text-muted mb-1">Location:</div>
+                                        <div>{selectedBooking.address.address}, {selectedBooking.address.city}</div>
+                                    </ListGroup.Item>
+                                )}
+                            </ListGroup>
+                        </div>
                     )}
                 </Modal.Body>
-                <Modal.Footer className="border-0">
+                <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowDetailModal(false)}>Close</Button>
-                    {selectedBooking && renderPaymentButton(selectedBooking)}
                 </Modal.Footer>
             </Modal>
 
-            <ReviewModal show={showReviewModal} onHide={() => setShowReviewModal(false)} booking={selectedBookingForReview} onReviewSubmitted={handleReviewSubmitted} />
-            <PaymentModal show={showPaymentModal} onHide={() => { setShowPaymentModal(false); setSelectedBookingForPayment(null); setPaymentAmount(0); }} booking={selectedBookingForPayment} amount={paymentAmount} onPaymentSuccess={handlePaymentSuccess} />
+            {/* Payment & Review Modals */}
+            <ReviewModal show={showReviewModal} onHide={() => setShowReviewModal(false)} booking={selectedBooking} onReviewSubmitted={fetchUserBookings} />
+            <PaymentModal show={showPaymentModal} onHide={() => { setShowPaymentModal(false); setSelectedBooking(null); setPaymentAmount(0); }} booking={selectedBooking} amount={paymentAmount} onPaymentSuccess={() => { fetchUserBookings(); setShowPaymentModal(false); }} />
             
             <Modal show={showAmountModal} onHide={() => setShowAmountModal(false)} centered>
                 <Modal.Header closeButton><Modal.Title>Payment Amount</Modal.Title></Modal.Header>
@@ -942,300 +771,153 @@ function MyBookings({ user }) {
 }
 
 function MyAddresses({ user }) {
-  const [addresses, setAddresses] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editAddress, setEditAddress] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    isDefault: false
-  });
+    const [addresses, setAddresses] = useState([]);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [editAddress, setEditAddress] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({ name: '', address: '', city: '', state: '', pincode: '', isDefault: false });
+    
+    useEffect(() => {
+        loadAddresses();
+    }, []);
 
-  useEffect(() => {
-    loadAddresses();
-  }, [user.id]);
+    const loadAddresses = async () => {
+        try {
+            setLoading(true);
+            const data = await addressService.getAddresses();
+            setAddresses(data);
+        } catch (e) { console.error(e); } finally { setLoading(false); }
+    };
 
-  const loadAddresses = async () => {
-    try {
-      setLoading(true);
-      const addressesData = await addressService.getAddresses();
-      setAddresses(addressesData);
-      setError('');
-    } catch (err) {
-      setError('Failed to load addresses');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleSave = async () => {
+        try {
+            setLoading(true);
+            if (editAddress) {
+                await addressService.updateAddress(editAddress.id, formData);
+            } else {
+                await addressService.addAddress(formData);
+            }
+            setShowAddModal(false);
+            setEditAddress(null);
+            setFormData({ name: '', address: '', city: '', state: '', pincode: '', isDefault: false });
+            loadAddresses();
+        } catch (e) { alert("Failed to save address"); } finally { setLoading(false); }
+    };
 
-  const handleAddAddress = async () => {
-    try {
-      setLoading(true);
-      const newAddress = await addressService.addAddress(formData);
-      setAddresses(prev => [...prev, newAddress]);
-      setShowAddModal(false);
-      resetForm();
-      setSuccess('Address added successfully!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add address');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleDelete = async (id) => {
+        if(window.confirm("Delete this address?")) {
+            await addressService.deleteAddress(id);
+            loadAddresses();
+        }
+    };
 
-  const handleEditAddress = (address) => {
-    setEditAddress(address);
-    setFormData({
-      name: address.name,
-      address: address.address,
-      city: address.city,
-      state: address.state,
-      pincode: address.pincode,
-      isDefault: address.isDefault
-    });
-    setShowAddModal(true);
-  };
+    const openEdit = (addr) => {
+        setEditAddress(addr);
+        setFormData({ name: addr.name, address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode, isDefault: addr.isDefault });
+        setShowAddModal(true);
+    };
 
-  const handleUpdateAddress = async () => {
-    try {
-      setLoading(true);
-      const updatedAddress = await addressService.updateAddress(editAddress.id, formData);
-      setAddresses(prev => prev.map(addr => 
-        addr.id === editAddress.id ? updatedAddress : addr
-      ));
-      setShowAddModal(false);
-      setEditAddress(null);
-      resetForm();
-      setSuccess('Address updated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update address');
-    } finally {
-      setLoading(false);
-    }
-  };
+    return (
+        <div>
+             <div className="d-flex justify-content-between align-items-center mb-4">
+                 <h4 className="fw-bold m-0">Saved Addresses</h4>
+                 <Button variant="primary" className="rounded-circle shadow-lg d-flex align-items-center justify-content-center" style={{width: '40px', height: '40px'}} onClick={() => { setEditAddress(null); setFormData({name: '', address: '', city: '', state: '', pincode: '', isDefault: false}); setShowAddModal(true); }}>
+                    <span className="fs-4 lh-1">+</span>
+                 </Button>
+            </div>
+            
+            {loading && addresses.length === 0 && <div className="text-center"><Spinner animation="border" size="sm"/></div>}
 
-  const handleDeleteAddress = async (id) => {
-    if (window.confirm('Are you sure you want to delete this address?')) {
-      try {
-        setLoading(true);
-        await addressService.deleteAddress(id);
-        setAddresses(prev => prev.filter(addr => addr.id !== id));
-        setSuccess('Address deleted successfully!');
-        setTimeout(() => setSuccess(''), 3000);
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to delete address');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const setDefaultAddress = async (id) => {
-    try {
-      setLoading(true);
-      const updatedAddress = await addressService.setDefaultAddress(id);
-      setAddresses(prev => prev.map(addr => 
-        addr.id === id ? updatedAddress : { ...addr, isDefault: false }
-      ));
-      setSuccess('Default address updated!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to set default');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      address: '',
-      city: '',
-      state: '',
-      pincode: '',
-      isDefault: false
-    });
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
-  };
-
-  const handleModalClose = () => {
-    setShowAddModal(false);
-    setEditAddress(null);
-    resetForm();
-    setError('');
-  };
-
-  return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h5 className="fw-bold m-0 text-primary">Saved Addresses</h5>
-        <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={loading} className="rounded-pill px-3">
-          + Add New
-        </Button>
-      </div>
-
-      {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
-      {success && <Alert variant="success" onClose={() => setSuccess('')} dismissible>{success}</Alert>}
-
-      {loading && addresses.length === 0 ? (
-        <div className="text-center py-4"><Spinner animation="border" size="sm" /></div>
-      ) : addresses.length === 0 ? (
-        <div className="text-center py-5 border rounded bg-light">
-          <div className="display-4 text-muted mb-2 opacity-50"><Icons.GeoAlt /></div>
-          <h6>No Addresses Found</h6>
-          <p className="small text-muted">Add an address to checkout faster.</p>
-        </div>
-      ) : (
-        <Row>
-          {addresses.map((address) => (
-            <Col md={6} key={address.id} className="mb-3">
-              <Card className={`card-hover h-100 ${address.isDefault ? 'border-primary border-2 shadow-sm' : 'border shadow-sm'}`}>
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <h6 className="fw-bold mb-0">{address.name}</h6>
-                    {address.isDefault && <Badge bg="primary">Default</Badge>}
-                  </div>
-                  <p className="mb-2 small text-muted" style={{ minHeight: '40px' }}>
-                    {address.address}<br />
-                    {address.city}, {address.state} - {address.pincode}
-                  </p>
-                  <div className="d-flex gap-2 pt-2 border-top mt-3">
-                    <Button variant="light" size="sm" className="flex-fill" onClick={() => handleEditAddress(address)}>Edit</Button>
-                    {!address.isDefault && (
-                        <>
-                            <Button variant="light" size="sm" className="flex-fill" onClick={() => setDefaultAddress(address.id)}>Set Default</Button>
-                            <Button variant="light" size="sm" className="text-danger flex-fill" onClick={() => handleDeleteAddress(address.id)}>Delete</Button>
-                        </>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
-
-      {/* Add/Edit Modal */}
-      <Modal show={showAddModal} onHide={handleModalClose} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{editAddress ? 'Edit Address' : 'Add New Address'}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Label</Form.Label>
-              <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} placeholder="e.g. Home, Work" required />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Address</Form.Label>
-              <Form.Control as="textarea" rows={2} name="address" value={formData.address} onChange={handleChange} placeholder="Street, House No." required />
-            </Form.Group>
             <Row>
-              <Col><Form.Group className="mb-3"><Form.Label>City</Form.Label><Form.Control type="text" name="city" value={formData.city} onChange={handleChange} required /></Form.Group></Col>
-              <Col><Form.Group className="mb-3"><Form.Label>State</Form.Label><Form.Control type="text" name="state" value={formData.state} onChange={handleChange} required /></Form.Group></Col>
+                {addresses.map(addr => (
+                    <Col md={6} key={addr.id} className="mb-3">
+                        <div className={`glass-card p-4 h-100 position-relative ${addr.isDefault ? 'border-primary' : ''}`} style={{borderWidth: addr.isDefault ? '2px' : '1px'}}>
+                            {addr.isDefault && <Badge bg="primary" className="position-absolute top-0 end-0 m-3">Default</Badge>}
+                            <h6 className="fw-bold mb-2 text-dark"><Icons.GeoAlt /> {addr.name}</h6>
+                            <p className="text-muted small mb-3">
+                                {addr.address}<br/>
+                                {addr.city}, {addr.state} - {addr.pincode}
+                            </p>
+                            <div className="d-flex gap-2 border-top pt-3">
+                                <Button variant="outline-dark" size="sm" className="rounded-pill px-3 flex-grow-1" onClick={() => openEdit(addr)}>Edit</Button>
+                                <Button variant="outline-danger" size="sm" className="rounded-pill px-3 flex-grow-1" onClick={() => handleDelete(addr.id)}>Delete</Button>
+                            </div>
+                        </div>
+                    </Col>
+                ))}
             </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>Pincode</Form.Label>
-              <Form.Control type="text" name="pincode" value={formData.pincode} onChange={handleChange} maxLength={6} required />
-            </Form.Group>
-            <Form.Check type="checkbox" name="isDefault" label="Set as default address" checked={formData.isDefault} onChange={handleChange} />
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleModalClose}>Cancel</Button>
-          <Button variant="primary" onClick={editAddress ? handleUpdateAddress : handleAddAddress} disabled={loading}>
-            {loading ? 'Saving...' : 'Save Address'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
-  );
+
+            <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
+                <Modal.Header closeButton><Modal.Title>{editAddress ? 'Edit Address' : 'New Address'}</Modal.Title></Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3"><Form.Label>Label (Home/Work)</Form.Label><Form.Control type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></Form.Group>
+                        <Form.Group className="mb-3"><Form.Label>Address Line</Form.Label><Form.Control as="textarea" rows={2} value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} /></Form.Group>
+                        <Row>
+                            <Col><Form.Group className="mb-3"><Form.Label>City</Form.Label><Form.Control type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} /></Form.Group></Col>
+                            <Col><Form.Group className="mb-3"><Form.Label>State</Form.Label><Form.Control type="text" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} /></Form.Group></Col>
+                        </Row>
+                        <Form.Group className="mb-3"><Form.Label>Pincode</Form.Label><Form.Control type="text" value={formData.pincode} onChange={e => setFormData({...formData, pincode: e.target.value})} /></Form.Group>
+                        <Form.Check type="checkbox" label="Set as default address" checked={formData.isDefault} onChange={e => setFormData({...formData, isDefault: e.target.checked})} />
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAddModal(false)}>Cancel</Button>
+                    <Button variant="primary" onClick={handleSave}>{loading ? 'Saving...' : 'Save Address'}</Button>
+                </Modal.Footer>
+            </Modal>
+        </div>
+    )
 }
 
-// Admin Panel Component
 function AdminPanel({ user }) {
-  const [key, setKey] = useState('overview');
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ totalUsers: 0, totalProviders: 0, totalBookings: 0, revenue: 0 });
+    const [stats, setStats] = useState({ totalUsers: 0, totalProviders: 0, totalBookings: 0, revenue: 0 });
 
-  useEffect(() => {
-     const fetchStats = async () => {
-       try {
-         const response = await api.get('/admin/stats');
-         setStats(response.data);
-       } catch (error) {
-         console.error("Error fetching admin stats:", error);
-       } finally {
-         setLoading(false);
-       }
-     };
-     fetchStats();
-  }, []);
+    useEffect(() => {
+        // Mock stats or fetch real ones
+        api.get('/admin/stats').then(res => setStats(res.data)).catch(err => console.log("Stats error or not implemented"));
+    }, []);
 
-  if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
-
-  const StatCard = ({ title, value, color, icon }) => (
-      <Card className={`border-0 bg-${color} bg-gradient text-white h-100 shadow-sm`}>
-          <Card.Body>
-              <div className="display-6 fw-bold mb-1">{value}</div>
-              <div className="opacity-75 small text-uppercase fw-bold">{title}</div>
-          </Card.Body>
-      </Card>
-  );
-
-  return (
-    <div>
-      <h5 className="fw-bold mb-4 text-primary">Admin Dashboard</h5>
-      <Tabs id="admin-tabs" activeKey={key} onSelect={(k) => setKey(k)} className="custom-tabs mb-4" variant="pills">
-        <Tab eventKey="overview" title="Overview">
-          <Row className="g-3 mb-4">
-            <Col md={3}><StatCard title="Total Users" value={stats.totalUsers} color="primary" /></Col>
-            <Col md={3}><StatCard title="Providers" value={stats.totalProviders} color="success" /></Col>
-            <Col md={3}><StatCard title="Bookings" value={stats.totalBookings} color="warning" /></Col>
-            <Col md={3}><StatCard title="Revenue" value={`₹${stats.revenue}`} color="info" /></Col>
-          </Row>
-          
-          <Row>
-            <Col md={6}>
-                <Card className="border-0 shadow-sm h-100">
-                    <Card.Body>
-                        <h6 className="fw-bold mb-3">Quick Actions</h6>
-                        <Button variant="outline-primary" className="w-100 mb-2" onClick={() => setKey('verifications')}>Manage Pending Verifications</Button>
-                        <Button variant="outline-secondary" className="w-100" disabled>View Reports (Coming Soon)</Button>
-                    </Card.Body>
-                </Card>
-            </Col>
-            <Col md={6}>
-                <Card className="border-0 shadow-sm h-100">
-                    <Card.Body>
-                        <h6 className="fw-bold mb-3">System Health</h6>
-                        <Alert variant="success" className="mb-0 border-0 bg-success bg-opacity-10"><Icons.CheckCircle /> System Online & Running</Alert>
-                    </Card.Body>
-                </Card>
-            </Col>
-          </Row>
-        </Tab>
-        <Tab eventKey="verifications" title="Pending Verifications">
-           <Verifications />
-        </Tab>
-      </Tabs>
-    </div>
-  );
+    return (
+        <div>
+            <h4 className="fw-bold mb-4">Admin Dashboard</h4>
+            <Row className="g-3 mb-4">
+                <Col md={3}>
+                    <div className="glass-card p-3 text-center hover-effect h-100">
+                        <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Total Users</small>
+                        <div className="display-6 fw-bold text-primary mt-1">{stats.totalUsers}</div>
+                    </div>
+                </Col>
+                <Col md={3}>
+                    <div className="glass-card p-3 text-center hover-effect h-100">
+                        <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Providers</small>
+                        <div className="display-6 fw-bold text-success mt-1">{stats.totalProviders}</div>
+                    </div>
+                </Col>
+                <Col md={3}>
+                    <div className="glass-card p-3 text-center hover-effect h-100">
+                        <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Bookings</small>
+                        <div className="display-6 fw-bold text-warning mt-1">{stats.totalBookings}</div>
+                    </div>
+                </Col>
+                <Col md={3}>
+                    <div className="glass-card p-3 text-center hover-effect h-100">
+                        <small className="text-uppercase text-muted fw-bold" style={{fontSize:'0.7rem'}}>Revenue</small>
+                        <div className="display-6 fw-bold text-info mt-1">₹{stats.revenue}</div>
+                    </div>
+                </Col>
+            </Row>
+            
+            <Card className="border-0 shadow-sm rounded-4">
+                <Card.Header className="bg-white border-0 pt-4 px-4">
+                    <h5 className="fw-bold">Pending Verifications</h5>
+                </Card.Header>
+                <Card.Body>
+                    <Verifications />
+                </Card.Body>
+            </Card>
+        </div>
+    )
 }
 
 export default Profile;

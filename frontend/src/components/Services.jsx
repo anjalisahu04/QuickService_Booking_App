@@ -11,7 +11,8 @@ import {
     Brush, 
     Hammer, 
     GearWideConnected,
-    ArrowRightCircle
+    ArrowRightCircle,
+    CheckCircleFill
 } from 'react-bootstrap-icons';
 import './Services.css';
 import { addressService } from './AddressService';
@@ -25,53 +26,53 @@ function Services() {
     const [currentUser, setCurrentUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
     
-    // Categories with attractive icons and descriptions (Ratings removed)
+    // Categories
     const categories = [
         { 
             name: 'Plumber', 
-            icon: <WrenchAdjustable size={32} />, 
-            count: 'Plumbers', 
+            icon: <WrenchAdjustable size={28} />, 
+            count: 'Verified Pros', 
             desc: 'Leakages, pipes, and installation',
-            color: 'icon-box-primary', 
+            color: 'gradient-primary', 
         },
         { 
             name: 'Electrician', 
-            icon: <LightningCharge size={32} />, 
-            count: 'Electricians', 
+            icon: <LightningCharge size={28} />, 
+            count: 'Certified Experts', 
             desc: 'Wiring, switch, and appliance',
-            color: 'icon-box-warning', 
+            color: 'gradient-warning', 
         },
         { 
             name: 'Cleaner', 
-            icon: <Stars size={32} />, 
-            count: 'Cleaners', 
+            icon: <Stars size={28} />, 
+            count: 'Top Rated', 
             desc: 'Home, kitchen, and bathroom',
-            color: 'icon-box-success', 
+            color: 'gradient-success', 
         },
         { 
             name: 'Painter', 
-            icon: <Brush size={32} />, 
-            count: 'Painters', 
+            icon: <Brush size={28} />, 
+            count: 'Skilled Artists', 
             desc: 'Wall putty, texture, and paint',
-            color: 'icon-box-danger', 
+            color: 'gradient-danger', 
         },
         { 
             name: 'Carpenter', 
-            icon: <Hammer size={32} />, 
-            count: 'Carpenters', 
+            icon: <Hammer size={28} />, 
+            count: 'Wood Experts', 
             desc: 'Furniture repair and assembly',
-            color: 'icon-box-secondary', 
+            color: 'gradient-info', 
         },
         { 
             name: 'Appliance Repair', 
-            icon: <GearWideConnected size={32} />, 
-            count: 'Experts', 
+            icon: <GearWideConnected size={28} />, 
+            count: 'Fast Service', 
             desc: 'AC, fridge, and washing machine',
-            color: 'icon-box-info', 
+            color: 'gradient-dark', 
         },
     ];
 
-    // --- LOGIC (Unchanged) ---
+    // --- LOGIC ---
     useEffect(() => {
         const userData = localStorage.getItem('user');
         if (userData) {
@@ -127,72 +128,77 @@ function Services() {
     const handleQuickTag = (term) => setSearchTerm(term);
 
     return (
-        <div className="page-wrapper">
+        <div className="page-wrapper bg-light">
             
             {/* HERO SECTION */}
             <div className="hero-section">
-                <div className="hero-overlay"></div>
-                <Container className="position-relative z-index-1 pt-4 pb-5">
+                <div className="hero-bg-pattern"></div>
+                <Container className="position-relative pt-4 pb-5">
                     
                     {/* Top Location Bar */}
-                    <div className="d-flex justify-content-between align-items-center mb-5 text-white">
-                        <div className="d-flex align-items-center location-glass px-3 py-2 rounded-pill">
+                    <div className="d-flex justify-content-center mb-5">
+                        <div className="location-pill glass-effect d-flex align-items-center px-4 py-2 rounded-pill shadow-sm animate-fade-down">
                             {loadingLocation && !isAdmin ? (
-                                <Spinner animation="border" variant="light" size="sm" className="me-2" />
+                                <Spinner animation="border" variant="primary" size="sm" className="me-2" />
                             ) : (
                                 <>
-                                    <GeoAlt className="me-2" />
-                                    <span className="small fw-bold">
+                                    <div className="bg-primary bg-opacity-10 p-1 rounded-circle me-2 text-primary">
+                                        <GeoAlt size={16} />
+                                    </div>
+                                    <span className="small fw-bold text-dark me-3">
                                         {isAdmin ? "Global Admin View" : (userCities.length > 0 ? userCities[0] : "Select Location")}
                                     </span>
                                 </>
                             )}
+                            {(!isAdmin && (userCities.length === 0 || locationError)) && (
+                                <Button variant="link" className="p-0 text-decoration-none fw-bold small text-primary" onClick={handleAddAddress}>
+                                    + Add Address
+                                </Button>
+                            )}
                         </div>
-                        {(!isAdmin && (userCities.length === 0 || locationError)) && (
-                            <Button variant="light" size="sm" className="rounded-pill fw-bold" onClick={handleAddAddress}>
-                                + Add Address
-                            </Button>
-                        )}
                     </div>
 
-                    {/* Hero Content with "Expert Services, On Demand" */}
-                    <Row className="justify-content-center text-center text-white">
+                    {/* Hero Content */}
+                    <Row className="justify-content-center text-center" >
                         <Col lg={8}>
-                            <h1 className="display-4 fw-bold mb-3 animate-fade-down">
-                                {isAdmin ? 'Admin Dashboard' : 'Expert Services, On Demand'}
+                            <h1 className="display-4 fw-bolder mb-3 text-dark animate-fade-up">
+                                {/* --- UPDATED: Light Blue Background Highlight --- */}
+                                {isAdmin ? 'Admin Dashboard' : <span className="highlight-blue">Expert Services,</span>} 
+                                <br />
+                                {isAdmin ? '' : 'Right at Your Doorstep'}
                             </h1>
-                            <p className="lead mb-4 opacity-75 animate-fade-up">
-                                {isAdmin ? 'Manage your service providers efficiently.' : 'Book trusted professionals for all your home needs.'}
+                            <p className="lead text-muted mb-5 px-lg-5 animate-fade-up delay-1">
+                                {isAdmin ? 'Manage your service providers efficiently and oversee global operations.' : 'Book trusted, verified professionals for cleaning, repairs, painting and more.'}
                             </p>
 
                             {/* Search Bar */}
-                            <div className="search-wrapper mx-auto mb-4 animate-scale-in">
-                                <InputGroup className="input-group-lg shadow-lg">
-                                    <InputGroup.Text className="bg-white border-0 ps-4 text-primary">
+                            <div className="search-container mx-auto mb-4 animate-scale-in delay-2">
+                                <InputGroup className="input-group-lg shadow-lg rounded-pill overflow-hidden bg-white border p-1">
+                                    <InputGroup.Text className="bg-white border-0 ps-4 text-muted">
                                         <Search />
                                     </InputGroup.Text>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Search for 'Kitchen Cleaning'..."
-                                        className="border-0 py-3"
+                                        placeholder="Search for 'Electrician'..."
+                                        className="border-0 shadow-none"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                     />
-                                    <Button variant="primary" className="px-4 fw-bold">
+                                    <Button variant="primary" className="rounded-pill px-4 fw-bold m-1">
                                         Search
                                     </Button>
                                 </InputGroup>
                             </div>
 
                             {/* Quick Tags */}
-                            <div className="d-flex justify-content-center gap-2 flex-wrap animate-fade-up delay-1">
-                                <span className="small opacity-75 me-2 pt-1">Popular:</span>
+                            <div className="d-flex justify-content-center gap-2 flex-wrap animate-fade-up delay-3">
+                                <span className="small text-muted pt-1">Trending:</span>
                                 {['Plumber', 'Cleaner', 'Repair'].map(tag => (
                                     <Badge 
                                         key={tag} 
-                                        bg="light" 
+                                        bg="white" 
                                         text="dark" 
-                                        className="cursor-pointer bg-opacity-25 text-white border border-white border-opacity-25 fw-normal px-3 py-2 rounded-pill hover-glass"
+                                        className="cursor-pointer border fw-normal px-3 py-2 rounded-pill hover-shadow transition-all"
                                         onClick={() => handleQuickTag(tag)}
                                     >
                                         {tag}
@@ -202,64 +208,57 @@ function Services() {
                         </Col>
                     </Row>
                 </Container>
-                
-                {/* Curved Divider */}
-                {/* <div className="custom-shape-divider-bottom-1680000000">
-                    <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
-                    </svg>
-                </div> */}
             </div>
 
             {/* MAIN CONTENT */}
-            <section className="py-5 bg-light">
+            <section className="py-5">
                 <Container>
-                    <div className="d-flex justify-content-between align-items-end mb-4">
+                    <div className="d-flex justify-content-between align-items-end mb-4 px-2">
                         <div>
                             <h4 className="fw-bold text-dark mb-1">
-                                {searchTerm ? 'Search Results' : 'All Categories'}
+                                {searchTerm ? `Results for "${searchTerm}"` : 'Explore Categories'}
                             </h4>
-                            <small className="text-muted">
-                                {filteredCategories.length} services available
-                            </small>
+                            <p className="text-muted small mb-0">
+                                {filteredCategories.length} professional services available
+                            </p>
                         </div>
                     </div>
 
                     <Row className="g-4">
                         {filteredCategories.length === 0 ? (
                             <Col className="text-center py-5">
-                                <div className="display-1 text-muted opacity-25 mb-3">😕</div>
-                                <h5>No services found</h5>
-                                <p className="text-muted">Try changing your search term.</p>
-                                <Button variant="outline-primary" onClick={() => setSearchTerm('')}>Clear Search</Button>
+                                <div className="display-1 text-muted opacity-25 mb-3">🔍</div>
+                                <h5>No matching services found</h5>
+                                <p className="text-muted">Try checking your spelling or use general terms.</p>
+                                <Button variant="outline-primary" onClick={() => setSearchTerm('')} className="rounded-pill px-4">Clear Search</Button>
                             </Col>
                         ) : (
                             filteredCategories.map((category, index) => (
                                 <Col lg={4} md={6} key={index}>
                                     <Card 
-                                        className="service-card border-0 h-100 overflow-hidden" 
+                                        className="service-card border-0 h-100 shadow-sm hover-lift" 
                                         onClick={() => handleCategoryClick(category)}
                                     >
-                                        <Card.Body className="p-4">
-                                            {/* Header with just Icon */}
-                                            <div className="mb-4">
-                                                <div className={`icon-box ${category.color}`}>
+                                        <Card.Body className="p-4 d-flex flex-column">
+                                            {/* Icon Header */}
+                                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                                <div className={`icon-box rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm ${category.color}`} style={{width: '60px', height: '60px'}}>
                                                     {category.icon}
                                                 </div>
+                                                <Badge bg="light" text="dark" className="border d-flex align-items-center gap-1">
+                                                    <CheckCircleFill className="text-success" size={10}/> {category.count}
+                                                </Badge>
                                             </div>
 
-                                            <h5 className="fw-bold text-dark mb-1">{category.name}</h5>
-                                            <p className="text-muted small mb-3">{category.desc}</p>
-                                            
-                                            <hr className="opacity-10 my-3" />
+                                            <div className="mt-2">
+                                                <h5 className="fw-bold text-dark mb-1">{category.name}</h5>
+                                                <p className="text-muted small mb-4">{category.desc}</p>
+                                            </div>
 
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                <small className="text-primary fw-bold bg-light px-2 py-1 rounded">
-                                                    {category.count} Pros
-                                                </small>
-                                                <div className="action-text d-flex align-items-center text-primary fw-bold small">
-                                                    {isAdmin ? 'Manage' : 'Book Now'} 
-                                                    <ArrowRightCircle className="ms-2" />
+                                            <div className="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                                                <span className="text-muted small fw-bold">View Providers</span>
+                                                <div className="action-btn text-primary">
+                                                    <ArrowRightCircle size={24} />
                                                 </div>
                                             </div>
                                         </Card.Body>
@@ -269,13 +268,15 @@ function Services() {
                         )}
                     </Row>
 
-                    {/* Admin Alert Footer */}
+                    {/* Admin Alert */}
                     {isAdmin && (
-                        <Alert variant="primary" className="mt-5 border-0 shadow-sm d-flex align-items-center">
-                            <Shield className="display-6 me-3" />
+                        <Alert variant="primary" className="mt-5 border-0 shadow rounded-4 d-flex align-items-center p-4 bg-white">
+                            <div className="bg-primary bg-opacity-10 p-3 rounded-circle me-3 text-primary">
+                                <Shield size={24} />
+                            </div>
                             <div>
-                                <h6 className="fw-bold mb-1">Admin Mode Active</h6>
-                                <p className="mb-0 small">You are viewing all categories globally. Click any card to manage providers.</p>
+                                <h6 className="fw-bold mb-1 text-dark">Admin Access Active</h6>
+                                <p className="mb-0 small text-muted">You have global access to all service categories.</p>
                             </div>
                         </Alert>
                     )}
